@@ -1,0 +1,82 @@
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+from django.views import View
+import json
+import pyrebase
+
+# Configuración de Firebase (asegúrate de que esta configuración sea similar a la que has usado previamente)
+firebase_config = {
+    "apiKey": "AIzaSyBVMbDxfHz4wtcCZd1tVLsngwOWTNTXltE",
+    "authDomain": "pruebadjango-cc7f1.firebaseapp.com",
+    "databaseURL": "https://pruebadjango-cc7f1-default-rtdb.firebaseio.com",
+    "projectId": "pruebadjango-cc7f1",
+    "storageBucket": "pruebadjango-cc7f1.appspot.com",
+    "messagingSenderId": "511727626220",
+    "appId": "1:511727626220:web:1b2a2a1e849a9f0e03c2c9",
+    "measurementId": "G-C003HSYZVR"
+}
+
+firebase = pyrebase.initialize_app(firebase_config)
+auth = firebase.auth()
+database = firebase.database()
+
+@method_decorator(csrf_exempt, name='dispatch')  # Desactivar protección CSRF para simplificar las pruebas
+class UsuarioView(View):
+    def post(self, request):
+        # Crear un nuevo usuario en Firebase
+        data = json.loads(request.body)
+        new_user = {
+            "username": data.get("username"),
+            "password": data.get("password"),
+            "name": data.get("name"),
+            "email": data.get("email"),
+        }
+        
+        try:
+            # Realizar la operación de creación en Firebase
+            user = auth.create_user_with_email_and_password(data.get("email"), data.get("password"))
+            database.child("Users").push(new_user)  # Utiliza push para generar automáticamente una clave única
+            return JsonResponse({"message": "Usuario creado exitosamente"}, status=201)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+    def get(self, request):
+        # Obtener la lista de usuarios desde Firebase
+        try:
+            users = database.child("Users").get().val()
+            if users:
+                return JsonResponse(users, status=200, safe=False)
+            else:
+                return JsonResponse({"error": "No hay usuarios disponibles"}, status=404)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+    def put(self, request):
+        # Actualizar información de un usuario en Firebase
+        data = json.loads(request.body)
+        try:
+            # Asume que el usuario a actualizar está identificado por su correo electrónico
+            user_email = data.get("email")
+            users = database.child("Users").get().val()
+            if user_email in users:
+                database.child("Users").child(user_email).update(data)
+                return JsonResponse({"message": "Usuario actualizado exitosamente"}, status=200)
+            else:
+                return JsonResponse({"error": "Usuario no encontrado"}, status=404)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+    def delete(self, request):
+        # Eliminar un usuario de Firebase por correo electrónico
+        data = json.loads(request.body)
+        try:
+            user_email = data.get("email")
+            users = database.child("Users").get().val()
+            if user_email in users:
+                database.child("Users").child(user_email).remove()
+                return JsonResponse({"message": "Usuario eliminado exitosamente"}, status=200)
+            else:
+                return JsonResponse({"error": "Usuario no encontrado"}, status=404)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)

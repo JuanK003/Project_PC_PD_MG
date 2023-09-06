@@ -11,6 +11,23 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+import pyrebase
+
+firebase_config = {
+    "apiKey": "AIzaSyBVMbDxfHz4wtcCZd1tVLsngwOWTNTXltE",
+    "authDomain": "pruebadjango-cc7f1.firebaseapp.com",
+    "databaseURL": "https://pruebadjango-cc7f1-default-rtdb.firebaseio.com",
+    "projectId": "pruebadjango-cc7f1",
+    "storageBucket": "pruebadjango-cc7f1.appspot.com",
+    "messagingSenderId": "511727626220",
+    "appId": "1:511727626220:web:1b2a2a1e849a9f0e03c2c9",
+    "measurementId": "G-C003HSYZVR"
+}
+
+# Inicializa Firebase
+firebase = pyrebase.initialize_app(firebase_config)
+auth = firebase.auth()
+database = firebase.database()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -37,6 +54,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'users',
 ]
 
 MIDDLEWARE = [
