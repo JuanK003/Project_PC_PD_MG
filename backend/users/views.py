@@ -80,3 +80,139 @@ class UsuarioView(View):
                 return JsonResponse({"error": "Usuario no encontrado"}, status=404)
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
+
+#--------------------------TORNEOS CRUD -----------------------------------------
+
+@method_decorator(csrf_exempt, name='dispatch')
+class TorneosView(View):
+    def post(self, request):
+        data = json.loads(request.body)
+        new_torneo = {
+                "nombre_torneo": data.get("nombre_torneo"),
+                "deporte": data.get("deporte"),
+                "fecha_inicio": data.get("fecha_inicio"),
+                "fecha_fin": data.get("fecha_fin"),
+                "id_usuario": data.get("id_usuario"),
+            }
+
+        equipos = data.get("equipos", [])  # Asume que equipos es una lista de objetos equipo
+
+        try:
+            # Realizar la operación de creación en Firebase
+            torneo_ref = database.child("Torneos").push(new_torneo)
+            torneo_id = torneo_ref.key
+
+            # Agregar equipos al torneo
+            for equipo in equipos:
+                equipo_data = {
+                    "nombre": equipo.get("nombre"),
+                    "jugadores": equipo.get("jugadores", [])  # Asume que jugadores es una lista de objetos jugador
+                }
+                equipo_ref = torneo_ref.child("equipos").push(equipo_data)
+
+            return JsonResponse({"message": "Torneo creado exitosamente", "id": torneo_id}, status=201)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+    def put(self, request, torneo_id):
+        data = json.loads(request.body)
+        equipo_data = {
+            "nombre": data.get("nombre"),
+            "jugadores": data.get("jugadores", [])  # Asume que jugadores es una lista de objetos jugador
+        }
+
+        try:
+            # Agregar el equipo al torneo existente en Firebase
+            torneo_ref = database.child("Torneos").child(torneo_id)
+            equipo_ref = torneo_ref.child("equipos").push(equipo_data)
+
+            return JsonResponse({"message": "Equipo agregado exitosamente", "equipo_id": equipo_ref.key}, status=200)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class TorneosView(View):
+    def post(self, request):
+        data = json.loads(request.body)
+        new_torneo = {
+                "nombre_torneo": data.get("nombre_torneo"),
+                "deporte": data.get("deporte"),
+                "fecha_inicio": data.get("fecha_inicio"),
+                "fecha_fin": data.get("fecha_fin"),
+                "id_usuario": data.get("id_usuario"),
+            }
+
+        equipos = data.get("equipos", [])  # Asume que equipos es una lista de objetos equipo
+
+        try:
+            # Realizar la operación de creación en Firebase
+            torneo_ref = database.child("Torneos").push(new_torneo)
+            torneo_id = torneo_ref.key
+
+            # Agregar equipos al torneo
+            for equipo in equipos:
+                equipo_data = {
+                    "nombre": equipo.get("nombre"),
+                    "jugadores": equipo.get("jugadores", [])  # Asume que jugadores es una lista de objetos jugador
+                }
+                equipo_ref = torneo_ref.child("equipos").push(equipo_data)
+
+            return JsonResponse({"message": "Torneo creado exitosamente", "id": torneo_id}, status=201)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+
+    def put(self, request, torneo_id):
+        data = json.loads(request.body)
+        equipo_data = {
+            "nombre": data.get("nombre"),
+            "jugadores": data.get("jugadores", [])  # Asume que jugadores es una lista de objetos jugador
+        }
+
+        try:
+            # Agregar el equipo al torneo existente en Firebase
+            torneo_ref = database.child("Torneos").child(torneo_id)
+            equipo_ref = torneo_ref.child("equipos").push(equipo_data)
+
+            return JsonResponse({"message": "Equipo agregado exitosamente", "equipo_id": equipo_ref.key}, status=200)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+    def delete(self, request, torneo_id):
+        try:
+            # Eliminar un torneo de Firebase por su ID
+            database.child("Torneos").child(torneo_id).remove()
+            return JsonResponse({"message": "Torneo eliminado exitosamente"}, status=200)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+    def put(self, request, torneo_id, equipo_id):
+        data = json.loads(request.body)
+        equipo_data = {
+            "nombre": data.get("nombre"),
+            "jugadores": data.get("jugadores", [])  # Asume que jugadores es una lista de objetos jugador
+        }
+
+        try:
+            # Actualizar información del equipo en el torneo existente en Firebase
+            torneo_ref = database.child("Torneos").child(torneo_id)
+            equipo_ref = torneo_ref.child("equipos").child(equipo_id)
+            equipo_ref.set(equipo_data)
+
+            return JsonResponse({"message": "Equipo actualizado exitosamente"}, status=200)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+    def delete(self, request, torneo_id, equipo_id):
+        try:
+            # Eliminar un equipo de un torneo en Firebase por su ID
+            torneo_ref = database.child("Torneos").child(torneo_id)
+            equipo_ref = torneo_ref.child("equipos").child(equipo_id)
+            equipo_ref.remove()
+
+            return JsonResponse({"message": "Equipo eliminado exitosamente"}, status=200)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+#-----------------------------
