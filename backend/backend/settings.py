@@ -13,6 +13,10 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 from pathlib import Path
 import pyrebase
 
+AUTHENTICATION_CLASSES = (
+    'users.authentication.FirebaseAuthentication',
+)
+
 firebase_config = {
     "apiKey": "AIzaSyBVMbDxfHz4wtcCZd1tVLsngwOWTNTXltE",
     "authDomain": "pruebadjango-cc7f1.firebaseapp.com",

@@ -4,6 +4,8 @@ from django.utils.decorators import method_decorator
 from django.views import View
 import json
 import pyrebase
+import bcrypt
+
 
 # Configuración de Firebase (asegúrate de que esta configuración sea similar a la que has usado previamente)
 firebase_config = {
@@ -28,14 +30,17 @@ class UsuarioView(View):
         data = json.loads(request.body)
         new_user = {
             "username": data.get("username"),
-            "password": data.get("password"),
             "name": data.get("name"),
             "email": data.get("email"),
         }
-        
+
         try:
-            # Realizar la operación de creación en Firebase
-            user = auth.create_user_with_email_and_password(data.get("email"), data.get("password"))
+            # Encripta contraseña bcrypt
+            password = data.get("password").encode('utf-8')
+            hashed_password = bcrypt.hashpw(password, bcrypt.gensalt())
+            print("Contraseña encriptada:", hashed_password)
+            # Realizar la operación de creación en Firebase con la contraseña encriptada
+            user = auth.create_user_with_email_and_password(data.get("email"), hashed_password.decode('utf-8'))
             database.child("Users").push(new_user)  # Utiliza push para generar automáticamente una clave única
             return JsonResponse({"message": "Usuario creado exitosamente"}, status=201)
         except Exception as e:
