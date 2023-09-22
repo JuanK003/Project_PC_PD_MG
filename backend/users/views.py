@@ -237,3 +237,76 @@ class TeamsView(View):
             return JsonResponse({"message": "Equipo eliminado exitosamente"}, status=200)
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
+        
+#----------------------------- PlayOffs CRUD ---------------------------------------
+
+@method_decorator(csrf_exempt, name='dispatch')
+class PlayoffsView(View):
+    def get(self, request, playoff_id=None):
+        if playoff_id:
+            try:
+                # Obtener información de un playoff específico en Firebase
+                playoff_data = database.child("Playoffs").child(playoff_id).get().val()
+                if playoff_data:
+                    return JsonResponse(playoff_data, status=200)
+                else:
+                    return JsonResponse({"error": "El playoff no existe"}, status=404)
+            except Exception as e:
+                return JsonResponse({"error": str(e)}, status=400)
+        else:
+            try:
+                # Obtener la lista de playoffs desde Firebase
+                playoffs = database.child("Playoffs").get().val()
+                if playoffs:
+                    return JsonResponse(playoffs, status=200)
+                else:
+                    return JsonResponse({"error": "No hay playoffs disponibles"}, status=404)
+            except Exception as e:
+                return JsonResponse({"error": str(e)}, status=400)
+
+    def post(self, request):
+        data = json.loads(request.body)
+        start_date = data.get('start_date', '')
+        end_date = data.get('end_date', '')
+        phases = data.get('phases', [])
+
+        try:
+            # Crear un nuevo playoff en Firebase
+            new_playoff = {
+                "start_date": start_date,
+                "end_date": end_date,
+                "phases": phases
+            }
+            playoff_ref = database.child("Playoffs").push(new_playoff)
+            playoff_id = playoff_ref.key
+
+            return JsonResponse({"message": "Playoff creado exitosamente", "id": playoff_id}, status=201)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+    def put(self, request, playoff_id):
+        data = json.loads(request.body)
+        start_date = data.get('start_date', '')
+        end_date = data.get('end_date', '')
+        phases = data.get('phases', [])
+
+        try:
+            # Actualizar información de un playoff en Firebase
+            playoff_data = {
+                "start_date": start_date,
+                "end_date": end_date,
+                "phases": phases
+            }
+            database.child("Playoffs").child(playoff_id).update(playoff_data)
+
+            return JsonResponse({"message": "Playoff actualizado exitosamente"}, status=200)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+    def delete(self, request, playoff_id):
+        try:
+            # Eliminar un playoff de Firebase por su ID
+            database.child("Playoffs").child(playoff_id).remove()
+            return JsonResponse({"message": "Playoff eliminado exitosamente"}, status=200)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)

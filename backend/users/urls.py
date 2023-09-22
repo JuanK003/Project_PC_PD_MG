@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import UsuarioView, TournamentView, TeamsView
+from .views import UsuarioView, TournamentView, TeamsView, PlayoffsView
 
 app_name = 'usuarios'
 
@@ -52,4 +52,21 @@ urlpatterns = [
 
     # Eliminar un equipo por ID
     path('equipos/eliminar/<str:equipo_id>/', TeamsView.as_view(), name='eliminar_equipo'),
+    
+    #-------------------------------------------------------------------------------------------------------
+    
+    # Lista de playoffs
+    path('playoffs/', PlayoffsView.as_view(), name='lista_playoffs'),
+
+    # Detalles de un playoff por ID
+    path('playoffs/<str:playoff_id>/', PlayoffsView.as_view(), name='detalle_playoff'),
+
+    # Crear un playoff
+    path('playoffs/crear/', PlayoffsView.as_view(), name='crear_playoff'),
+
+    # Actualizar un playoff por ID
+    path('playoffs/actualizar/<str:playoff_id>/', PlayoffsView.as_view(), name='actualizar_playoff'),
+
+    # Eliminar un playoff por ID
+    path('playoffs/eliminar/<str:playoff_id>/', PlayoffsView.as_view(), name='eliminar_playoff'), 
 ]
