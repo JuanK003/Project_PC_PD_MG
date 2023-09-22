@@ -20,12 +20,12 @@ urlpatterns = [
     path('usuarios/eliminar/<str:user_id>/', UsuarioView.as_view(), name='eliminar_usuario'),
 
 #-------------------------------------------------------------------------------------------------------
-
+    
     # Ruta para crear un nuevo torneo y agregar equipos
     path('torneos/', TournamentView.as_view(), name='crear_torneo'),
 
-    # Ruta para obtener una lista de todos los torneos
-    path('torneos/', TournamentView.as_view(), name='lista_torneos'),
+    # Ruta para obtener una lista de todos los torneos o crear uno nuevo
+    path('torneos/lista/', TournamentView.as_view(), name='lista_torneos'),
 
     # Ruta para obtener, actualizar o eliminar un torneo específico
     path('torneos/<str:torneo_id>/', TournamentView.as_view(), name='torneo_detail'),

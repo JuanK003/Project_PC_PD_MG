@@ -9,7 +9,7 @@ class Users(models.Model):
 
 class Tournaments(models.Model):
     id = models.AutoField(primary_key=True)
-    tournament_name = models.CharField(max_length=100)
+    name_tournament = models.CharField(max_length=100)
     sport = models.CharField(max_length=100)
     start_date = models.DateField()
     end_date = models.DateField()
