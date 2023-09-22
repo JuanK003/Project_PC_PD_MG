@@ -3,49 +3,54 @@ import { useState, useEffect } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import CompNavBarClientes from "../Navbar/Navbar";
 
-const URI ='http://localhost:8000/Usuarios/'
-
+const URI = 'http://localhost:8000/users/usuarios';
 
 const CompIniciarSesion = () => {
-    const [clientes, setClientes] = useState([]);
-    useEffect(() => {
-        getClientes();
-    }, []);
+  const [clientes, setClientes] = useState([]);
+  useEffect(() => {
+    getClientes();
+  }, []);
 
-
-    // Procedimiento para mostrar todos los componentes
-    const getClientes = async () => {
-        const res = await axios.get(URI);
+  // Procedimiento para mostrar todos los componentes
+  const getClientes = async () => {
+    try {
+      const res = await axios.get(URI);
+      if (Array.isArray(res.data)) {
         setClientes(res.data);
-    };
+      } else {
+        console.error("La respuesta de la API no es un array:", res.data);
+      }
+    } catch (error) {
+      console.error("Error al obtener clientes:", error);
+    }
+  };
 
-    const [correo, setCorreo] = useState('');
-    const [password, setPassword] = useState('');
-    const navigate = useNavigate();
+  const [correo, setCorreo] = useState('');
+  const [password, setPassword] = useState('');
+  const navigate = useNavigate();
 
-    const store = async (e) => {
-        e.preventDefault()
+  const store = async (e) => {
+    e.preventDefault();
 
-        clientes.map((cliente) => {
-            
-            if (correo === cliente.correo && password === cliente.password) {
-                console.log(cliente.password);
-                navigate(`/iniciocliente/${cliente.id}` ); // Envío de token como parámetro de la URL
-            }
-        });
-    };
+    if (Array.isArray(clientes)) {
+      clientes.map((cliente) => {
+        if (correo === cliente.correo && password === cliente.password) {
+          console.log(cliente.password);
+          navigate(`/iniciocliente/${cliente.id}`);
+        }
+        return null;
+      });
+    } else {
+      console.error("El estado 'clientes' no es un array válido:", clientes);
+    }
+  };
 
-            
-
-    return(
-        <>
-
-       <CompNavBarClientes></CompNavBarClientes>
-
-        <div className="flex min-h-full items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+  return (
+    <>
+      <CompNavBarClientes />
+      <div className="flex min-h-full items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="w-full max-w-md space-y-8">
-          <div>
-            {/* <img
+          {/* <img
               className="mx-auto h-12 w-auto"
               src="https://www.google.com/url?sa=i&url=https%3A%2F%2Fes.vecteezy.com%2Ffotos-gratis%2Ffutbol&psig=AOvVaw05NOmxijpm6V2sKIRMlsKg&ust=1694267310134000&source=images&cd=vfe&opi=89978449&ved=0CA4QjRxqFwoTCNiu5NyTm4EDFQAAAAAdAAAAABAI"
               alt="Your Company"
@@ -122,14 +127,13 @@ const CompIniciarSesion = () => {
                 type="submit"
                 className="group relative flex w-full justify-center rounded-md border border-transparent bg-red-600 py-2 px-4 text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
               >
-                
                 Iniciar Sesion
               </button>
             </div>
           </form>
-        </div>
       </div>
-        </>
-    )
-}
-export default CompIniciarSesion
+    </>
+  );
+};
+
+export default CompIniciarSesion;

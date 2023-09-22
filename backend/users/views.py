@@ -6,7 +6,6 @@ import json
 import pyrebase
 import bcrypt
 
-
 # Configuración de Firebase (asegúrate de que esta configuración sea similar a la que has usado previamente)
 firebase_config = {
     "apiKey": "AIzaSyBVMbDxfHz4wtcCZd1tVLsngwOWTNTXltE",
@@ -86,34 +85,34 @@ class UsuarioView(View):
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
 
-#--------------------------TORNEOS CRUD -----------------------------------------
+#--------------------------Tournament CRUD -----------------------------------------
 
 @method_decorator(csrf_exempt, name='dispatch')
-class TorneosView(View):
+class TournamentView(View):
     def post(self, request):
         data = json.loads(request.body)
         new_torneo = {
-                "nombre_torneo": data.get("nombre_torneo"),
-                "deporte": data.get("deporte"),
-                "fecha_inicio": data.get("fecha_inicio"),
-                "fecha_fin": data.get("fecha_fin"),
-                "id_usuario": data.get("id_usuario"),
+                "name_tournament": data.get("name_tournament"),
+                "sport": data.get("sport"),
+                "start_date": data.get("start_date"),
+                "end_date": data.get("end_date"),
+                "id_user": data.get("id_user"),
             }
 
-        equipos = data.get("equipos", [])  # Asume que equipos es una lista de objetos equipo
+        Teams = data.get("Teams", [])  # Asume que Teams es una lista de objetos equipo
 
         try:
             # Realizar la operación de creación en Firebase
-            torneo_ref = database.child("Torneos").push(new_torneo)
+            torneo_ref = database.child("Tournament").push(new_torneo)
             torneo_id = torneo_ref.key
 
-            # Agregar equipos al torneo
-            for equipo in equipos:
+            # Agregar Teams al torneo
+            for equipo in Teams:
                 equipo_data = {
-                    "nombre": equipo.get("nombre"),
-                    "jugadores": equipo.get("jugadores", [])  # Asume que jugadores es una lista de objetos jugador
+                    "name": equipo.get("name"),
+                    "players": equipo.get("players", [])  # Asume que players es una lista de objetos jugador
                 }
-                equipo_ref = torneo_ref.child("equipos").push(equipo_data)
+                equipo_ref = torneo_ref.child("Teams").push(equipo_data)
 
             return JsonResponse({"message": "Torneo creado exitosamente", "id": torneo_id}, status=201)
         except Exception as e:
@@ -123,14 +122,14 @@ class TorneosView(View):
     def put(self, request, torneo_id):
         data = json.loads(request.body)
         equipo_data = {
-            "nombre": data.get("nombre"),
-            "jugadores": data.get("jugadores", [])  # Asume que jugadores es una lista de objetos jugador
+            "name": data.get("name"),
+            "players": data.get("players", [])  # Asume que players es una lista de objetos jugador
         }
 
         try:
             # Agregar el equipo al torneo existente en Firebase
-            torneo_ref = database.child("Torneos").child(torneo_id)
-            equipo_ref = torneo_ref.child("equipos").push(equipo_data)
+            torneo_ref = database.child("Tournament").child(torneo_id)
+            equipo_ref = torneo_ref.child("Teams").push(equipo_data)
 
             return JsonResponse({"message": "Equipo agregado exitosamente", "equipo_id": equipo_ref.key}, status=200)
         except Exception as e:
@@ -139,7 +138,7 @@ class TorneosView(View):
     def delete(self, request, torneo_id):
         try:
             # Eliminar un torneo de Firebase por su ID
-            database.child("Torneos").child(torneo_id).remove()
+            database.child("Tournament").child(torneo_id).remove()
             return JsonResponse({"message": "Torneo eliminado exitosamente"}, status=200)
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
@@ -147,14 +146,14 @@ class TorneosView(View):
     def put(self, request, torneo_id, equipo_id):
         data = json.loads(request.body)
         equipo_data = {
-            "nombre": data.get("nombre"),
-            "jugadores": data.get("jugadores", [])  # Asume que jugadores es una lista de objetos jugador
+            "name": data.get("name"),
+            "players": data.get("players", [])  # Asume que players es una lista de objetos jugador
         }
 
         try:
             # Actualizar información del equipo en el torneo existente en Firebase
-            torneo_ref = database.child("Torneos").child(torneo_id)
-            equipo_ref = torneo_ref.child("equipos").child(equipo_id)
+            torneo_ref = database.child("Tournament").child(torneo_id)
+            equipo_ref = torneo_ref.child("Teams").child(equipo_id)
             equipo_ref.set(equipo_data)
 
             return JsonResponse({"message": "Equipo actualizado exitosamente"}, status=200)
@@ -164,12 +163,77 @@ class TorneosView(View):
     def delete(self, request, torneo_id, equipo_id):
         try:
             # Eliminar un equipo de un torneo en Firebase por su ID
-            torneo_ref = database.child("Torneos").child(torneo_id)
-            equipo_ref = torneo_ref.child("equipos").child(equipo_id)
+            torneo_ref = database.child("Tournament").child(torneo_id)
+            equipo_ref = torneo_ref.child("Teams").child(equipo_id)
             equipo_ref.remove()
 
             return JsonResponse({"message": "Equipo eliminado exitosamente"}, status=200)
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
 
-#-----------------------------
+#----------------------------- Teams CRUD ---------------------------------------
+
+@method_decorator(csrf_exempt, name='dispatch')
+class TeamsView(View):
+    def post(self, request):
+        # Crear un nuevo equipo y sus jugadores en Firebase
+        data = json.loads(request.body)
+        name = data.get("name")
+        players = data.get("players", [])
+
+        try:
+            # Crear el equipo en Firebase
+            equipo_ref = database.child("Teams").push({"name": name})
+
+            # Crear los jugadores del equipo en Firebase
+            for jugador_data in players:
+                jugador_ref = equipo_ref.child("players").push(jugador_data)
+
+            return JsonResponse({"message": "Equipo creado exitosamente"}, status=201)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+    def get(self, request):
+        # Obtener la lista de equipos y sus jugadores desde Firebase
+        try:
+            teams = database.child("Temas").get().val()
+            if teams:
+                return JsonResponse(teams, status=200, safe=False)
+            else:
+                return JsonResponse({"error": "No hay equipos disponibles"}, status=404)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+    def put(self, request):
+        # Actualizar información de un equipo y sus jugadores en Firebase
+        data = json.loads(request.body)
+        team_id = data.get("team_id")
+        name = data.get("name")
+        players = data.get("players", [])
+
+        try:
+            equipo_ref = database.child("Teams").child(team_id)
+            equipo_ref.update({"name": name})
+
+            # Eliminar los jugadores existentes del equipo en Firebase
+            equipo_ref.child("players").delete()
+
+            # Crear los jugadores actualizados en Firebase
+            for jugador_data in players:
+                jugador_ref = equipo_ref.child("players").push(jugador_data)
+
+            return JsonResponse({"message": "Equipo actualizado exitosamente"}, status=200)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+    def delete(self, request):
+        # Eliminar un equipo y sus jugadores de Firebase
+        data = json.loads(request.body)
+        team_id = data.get("team_id")
+
+        try:
+            equipo_ref = database.child("Teams").child(team_id)
+            equipo_ref.delete()
+            return JsonResponse({"message": "Equipo eliminado exitosamente"}, status=200)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)

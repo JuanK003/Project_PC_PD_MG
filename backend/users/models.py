@@ -7,42 +7,42 @@ class Users(models.Model):
     name = models.CharField(max_length=150)
     email = models.EmailField()
 
-class Torneos(models.Model):
+class Tournaments(models.Model):
     id = models.AutoField(primary_key=True)
-    nombre_torneo = models.CharField(max_length=100)
-    deporte = models.CharField(max_length=100)
-    fecha_inicio = models.DateField()
-    fecha_fin = models.DateField()
-    # Colección de equipos (referencia a la colección Equipos)
-    equipos = models.ManyToManyField('Equipos', related_name='torneos')
-    id_usuario = models.ForeignKey(Users, on_delete=models.CASCADE)
+    tournament_name = models.CharField(max_length=100)
+    sport = models.CharField(max_length=100)
+    start_date = models.DateField()
+    end_date = models.DateField()
+    # Collection of teams (reference to the Teams collection)
+    teams = models.ManyToManyField('Teams', related_name='tournaments')
+    user_id = models.ForeignKey(Users, on_delete=models.CASCADE)
 
-class Equipos(models.Model):
+class Teams(models.Model):
     id = models.AutoField(primary_key=True)
-    nombre = models.CharField(max_length=100)
-    # Colección de jugadores
-    jugadores = models.ManyToManyField('Jugadores', related_name='equipos')
+    name = models.CharField(max_length=100)
+    # Collection of players
+    players = models.ManyToManyField('Players', related_name='teams')
 
-class Jugadores(models.Model):
+class Players(models.Model):
     id = models.AutoField(primary_key=True)
-    nombre_jugador = models.CharField(max_length=100)
-    numero_identificador = models.CharField(max_length=100)
-    posicion = models.CharField(max_length=100)
-    numero = models.IntegerField()
+    player_name = models.CharField(max_length=100)
+    identifier_number = models.CharField(max_length=100)
+    position = models.CharField(max_length=100)
+    number = models.IntegerField()
 
 class Playoffs(models.Model):
     id = models.AutoField(primary_key=True)
-    fecha_inicio = models.DateField()
-    fecha_fin = models.DateField()
-    # Colección de fases
-    fases = models.ManyToManyField('Fases', related_name='playoffs')
+    start_date = models.DateField()
+    end_date = models.DateField()
+    # Collection of phases
+    phases = models.ManyToManyField('Phases', related_name='playoffs')
 
-class Fases(models.Model):
-    nombre_fase = models.CharField(max_length=100)
-    # Colección de partidos
-    partidos = models.ManyToManyField('Partidos', related_name='fases')
+class Phases(models.Model):
+    phase_name = models.CharField(max_length=100)
+    # Collection of matches
+    matches = models.ManyToManyField('Matches', related_name='phases')
 
-class Partidos(models.Model):
-    equipo_1 = models.ForeignKey(Equipos, on_delete=models.CASCADE, related_name='partidos_equipo_1')
-    equipo_2 = models.ForeignKey(Equipos, on_delete=models.CASCADE, related_name='partidos_equipo_2')
-    resultado = models.CharField(max_length=100)
+class Matches(models.Model):
+    team_1 = models.ForeignKey(Teams, on_delete=models.CASCADE, related_name='matches_team_1')
+    team_2 = models.ForeignKey(Teams, on_delete=models.CASCADE, related_name='matches_team_2')
+    result = models.CharField(max_length=100)

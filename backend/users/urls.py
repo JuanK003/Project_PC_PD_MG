@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import UsuarioView, TorneosView
+from .views import UsuarioView, TournamentView, TeamsView
 
 app_name = 'usuarios'
 
@@ -19,18 +19,37 @@ urlpatterns = [
     # Eliminar un usuario por ID
     path('usuarios/eliminar/<str:user_id>/', UsuarioView.as_view(), name='eliminar_usuario'),
 
+#-------------------------------------------------------------------------------------------------------
+
     # Ruta para crear un nuevo torneo y agregar equipos
-    path('torneos/', TorneosView.as_view(), name='crear_torneo'),
+    path('torneos/', TournamentView.as_view(), name='crear_torneo'),
 
     # Ruta para obtener una lista de todos los torneos
-    path('torneos/', TorneosView.as_view(), name='lista_torneos'),
+    path('torneos/', TournamentView.as_view(), name='lista_torneos'),
 
     # Ruta para obtener, actualizar o eliminar un torneo específico
-    path('torneos/<str:torneo_id>/', TorneosView.as_view(), name='torneo_detail'),
+    path('torneos/<str:torneo_id>/', TournamentView.as_view(), name='torneo_detail'),
 
     # Ruta para agregar un equipo a un torneo específico
-    path('torneos/<str:torneo_id>/equipos/', TorneosView.as_view(), name='agregar_equipo'),
+    path('torneos/<str:torneo_id>/equipos/', TournamentView.as_view(), name='agregar_equipo'),
 
     # Ruta para actualizar o eliminar un equipo en un torneo específico
-    path('torneos/<str:torneo_id>/equipos/<str:equipo_id>/', TorneosView.as_view(), name='equipo_detail'),
+    path('torneos/<str:torneo_id>/equipos/<str:equipo_id>/', TournamentView.as_view(), name='equipo_detail'),
+    
+    #-------------------------------------------------------------------------------------------------------
+    
+    # Lista de equipos
+    path('equipos/', TeamsView.as_view(), name='lista_equipos'),
+
+    # Detalles de un equipo por ID
+    path('equipos/<str:equipo_id>/', TeamsView.as_view(), name='detalle_equipo'),
+
+    # Crear un equipo
+    path('equipos/crear/', TeamsView.as_view(), name='crear_equipo'),
+
+    # Actualizar un equipo por ID
+    path('equipos/actualizar/<str:equipo_id>/', TeamsView.as_view(), name='actualizar_equipo'),
+
+    # Eliminar un equipo por ID
+    path('equipos/eliminar/<str:equipo_id>/', TeamsView.as_view(), name='eliminar_equipo'),
 ]
