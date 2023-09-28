@@ -25,7 +25,6 @@ database = firebase.database()
 @method_decorator(csrf_exempt, name='dispatch')  # Desactivar protección CSRF para simplificar las pruebas
 class UsuarioView(View):
     def post(self, request):
-        # Crear un nuevo usuario en Firebase
         data = json.loads(request.body)
         new_user = {
             "username": data.get("username"),
@@ -34,13 +33,17 @@ class UsuarioView(View):
         }
 
         try:
-            # Encripta contraseña bcrypt
+            # Encripta la contraseña con bcrypt
             password = data.get("password").encode('utf-8')
             hashed_password = bcrypt.hashpw(password, bcrypt.gensalt())
             print("Contraseña encriptada:", hashed_password)
-            # Realizar la operación de creación en Firebase con la contraseña encriptada
-            user = auth.create_user_with_email_and_password(data.get("email"), hashed_password.decode('utf-8'))
-            database.child("Users").push(new_user)  # Utiliza push para generar automáticamente una clave única
+
+            # Almacena la contraseña encriptada en el diccionario
+            new_user["password"] = hashed_password.decode('utf-8')
+
+            # Realiza la operación de creación en Firebase sin la contraseña encriptada
+            database.child("Users").push(new_user)
+
             return JsonResponse({"message": "Usuario creado exitosamente"}, status=201)
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
