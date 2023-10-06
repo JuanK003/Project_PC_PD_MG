@@ -2,12 +2,13 @@ import axios from "axios";
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import CompInicioAdmin from "../inicioAdministracion";
+import CompNavBarAdmin from "../../Navbar/NavbarAdmin";
 
 
 
 
 
-const URI='http://127.0.0.1:8000/olimpic/jugadores/'
+const URI='https://pruebadjango-cc7f1-default-rtdb.firebaseio.com/Players.json'
 
 const CompShowJugadores = () => {
     const [Jugadores,setJugadores]= useState([])
@@ -32,7 +33,7 @@ const CompShowJugadores = () => {
     }
     return(
         <>
-       <CompInicioAdmin></CompInicioAdmin>
+       <CompNavBarAdmin></CompNavBarAdmin>
         <div className="container">
         <div className="row">
         

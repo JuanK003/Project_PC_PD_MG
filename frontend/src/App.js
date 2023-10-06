@@ -6,6 +6,7 @@ import CompIniciosinlogin from './Componentes/Login/iniciosinlogin';
 import CompIniciarSesion from './Componentes/Login/IniciarSesion';
 import CompInicioAdmin from './Componentes/Administracion/inicioAdministracion';
 import CompShowJugadores from './Componentes/Administracion/Jugadores/ShowJugadores';
+import CompShowEquipos from './Componentes/Administracion/Equipos/ShowEquipos';
 
 
 
@@ -21,6 +22,8 @@ function App() {
         <Route path='/Administracion' element={<CompInicioAdmin></CompInicioAdmin>}></Route>
 
         <Route path='/Jugadores' element={<CompShowJugadores></CompShowJugadores>}></Route>
+
+        <Route path='/Equipos' element={<CompShowEquipos></CompShowEquipos>}></Route>
 
         </Routes>
       </BrowserRouter>
