@@ -6,7 +6,8 @@ import CompNavBarAdmin from "../../Navbar/NavbarAdmin";
 const URI = 'http://127.0.0.1:8000/olimpic/equipos/';
 
 const CompShowEquipos = () => {
-  const [Equipos, setEquipos] = useState([]);
+  const [equipos, setEquipos] = useState([]);
+  const [expandedEquipo, setExpandedEquipo] = useState(null);
 
   useEffect(() => {
     getEquipos();
@@ -15,8 +16,8 @@ const CompShowEquipos = () => {
   const getEquipos = async () => {
     try {
       const res = await axios.get(URI);
-      const EquiposArray = res.data ? Object.values(res.data) : [];
-      setEquipos(EquiposArray);
+      const equiposArray = res.data ? Object.values(res.data) : [];
+      setEquipos(equiposArray);
     } catch (error) {
       console.error("Error al obtener Equipos:", error);
     }
@@ -31,9 +32,17 @@ const CompShowEquipos = () => {
     }
   };
 
+  const toggleDetails = (equipo) => {
+    if (expandedEquipo === equipo) {
+      setExpandedEquipo(null);
+    } else {
+      setExpandedEquipo(equipo);
+    }
+  };
+
   return (
     <>
-    <CompNavBarAdmin></CompNavBarAdmin>
+      <CompNavBarAdmin></CompNavBarAdmin>
       <div className="container">
         <div className="row">
           <div className="col">
@@ -46,24 +55,41 @@ const CompShowEquipos = () => {
               <thead className="table-dark">
                 <tr>
                   <th>Nombre</th>
-        
                   <th>Acciones</th>
                 </tr>
               </thead>
               <tbody>
-                {Equipos.map((Equipo) => (
-                  <tr key={Equipo.name}>
-                    <td>{Equipo.name}</td>
-                    
-                    <td>
-                      <Link to={`/editEquipo/${Equipo.name}`} className="btn btn-info">
-                        <i className="fa-solid fa-pen-to-square"></i>
-                      </Link>
-                      <button onClick={() => deleteEquipo (Equipo.name)} className="btn btn-danger">
-                        <i className="fa-solid fa-trash"></i>
-                      </button>
-                    </td>
-                  </tr>
+                {equipos.map((equipo) => (
+                  <React.Fragment key={equipo.name}>
+                    <tr>
+                      <td>{equipo.name}</td>
+                      <td>
+                        <button onClick={() => toggleDetails(equipo)} className="btn btn-primary">
+                          Ver Detalles
+                        </button>
+                      </td>
+                    </tr>
+                    {expandedEquipo === equipo && (
+                      <tr>
+                        <td colSpan="2">
+                          <div>
+                            <h3>Detalles del Equipo:</h3>
+                            <p>Nombre: {equipo.name}</p>
+                            <p>Jugadores:</p>
+                            <ul>
+                              {equipo.players.map((jugador, index) => (
+                                <li key={index}>
+                                  <strong>Nombre del Jugador:</strong> {jugador.player_name}<br />
+                                  <strong>Número:</strong> {jugador.number}<br />
+                                  <strong>Posición:</strong> {jugador.position}<br />
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
                 ))}
               </tbody>
             </table>

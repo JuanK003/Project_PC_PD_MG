@@ -173,47 +173,56 @@ class TournamentView(View):
 @method_decorator(csrf_exempt, name='dispatch')
 class TeamsView(View):
     def post(self, request):
-        # Crear un nuevo equipo y sus jugadores en Firebase
         data = json.loads(request.body)
         name = data.get("name")
         players = data.get("players", [])
 
         try:
-            # Crear el equipo en Firebase
-            equipo_ref = database.child("Teams").push({"name": name})
+            # Obtiene una referencia a la base de datos de Firebase y la colección "Players"
+            ref = database.child('Players')
 
-            # Crear los jugadores del equipo en Firebase
-            for jugador_data in players:
-                jugador_ref = equipo_ref.child("players").push(jugador_data)
+            # Crea un nuevo equipo
+            new_team = {
+                "name": name,
+                "players": players
+            }
+            
+            ref.push(new_team)
 
             return JsonResponse({"message": "Equipo creado exitosamente"}, status=201)
-        except pyrebase.exceptions.RequestAborted as e:
+        except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
 
-    def get(self, request):
-        # Obtener la lista de equipos y sus jugadores desde Firebase
+    def get(self, request, equipo_id=None):
         try:
-            teams = database.child("Teams").get().val()
-            if teams:
-                return JsonResponse(teams, status=200, safe=False)
+            if equipo_id:
+                # Si se proporciona un equipo_id, busca un equipo específico
+                equipo_ref = database.child("Teams").child(equipo_id).get().val()
+                if equipo_ref:
+                    return JsonResponse(equipo_ref, status=200)
+                else:
+                    return JsonResponse({"error": "No se encontró el equipo"}, status=404)
             else:
-                return JsonResponse({"error": "No hay equipos disponibles"}, status=404)
+                # Si no se proporciona un equipo_id, lista todos los equipos
+                equipos_ref = database.child("Teams").get().val()
+                if equipos_ref:
+                    return JsonResponse(equipos_ref, status=200)
+                else:
+                    return JsonResponse({"error": "No hay equipos disponibles"}, status=404)
         except pyrebase.exceptions.RequestAborted as e:
             return JsonResponse({"error": str(e)}, status=400)
 
-    def put(self, request):
-        # Actualizar información de un equipo y sus jugadores en Firebase
+    def put(self, request, equipo_id):
         data = json.loads(request.body)
-        team_id = data.get("team_id")
         name = data.get("name")
         players = data.get("players", [])
 
         try:
-            equipo_ref = database.child("Teams").child(team_id)
+            equipo_ref = database.child("Teams").child(equipo_id)
             equipo_ref.update({"name": name})
 
             # Eliminar los jugadores existentes del equipo en Firebase
-            equipo_ref.child("players").delete()
+            equipo_ref.child("players").remove()
 
             # Crear los jugadores actualizados en Firebase
             for jugador_data in players:
@@ -223,14 +232,11 @@ class TeamsView(View):
         except pyrebase.exceptions.RequestAborted as e:
             return JsonResponse({"error": str(e)}, status=400)
 
-    def delete(self, request):
-        # Eliminar un equipo y sus jugadores de Firebase
-        data = json.loads(request.body)
-        team_id = data.get("team_id")
 
+    def delete(self, request, equipo_id):
         try:
-            equipo_ref = database.child("Teams").child(team_id)
-            equipo_ref.delete()
+            equipo_ref = database.child("Teams").child(equipo_id)
+            equipo_ref.remove()
             return JsonResponse({"message": "Equipo eliminado exitosamente"}, status=200)
         except pyrebase.exceptions.RequestAborted as e:
             return JsonResponse({"error": str(e)}, status=400)
