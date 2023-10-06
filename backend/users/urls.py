@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import UsuarioView, TournamentView, TeamsView, PlayoffsView
+from .views import UsuarioView, TournamentView, TeamsView, PlayoffsView, PlayersView, PhasesView, MatchesView
 
 app_name = 'usuarios'
 
@@ -69,4 +69,30 @@ urlpatterns = [
 
     # Eliminar un playoff por ID
     path('playoffs/eliminar/<str:playoff_id>/', PlayoffsView.as_view(), name='eliminar_playoff'), 
+
+#-------------------------------------------------------------------------------------------------------    
+        # Rutas para las entidades Players (jugadores)
+    path('jugadores/', PlayersView.as_view(), name='lista_jugadores'),
+    path('jugadores/crear/', PlayersView.as_view(), name='crear_jugador'),
+    path('jugadores/<str:player_id>/', PlayersView.as_view(), name='detalle_jugador'),
+    path('jugadores/actualizar/<str:player_id>/', PlayersView.as_view(), name='actualizar_jugador'),
+    path('jugadores/eliminar/<str:player_id>/', PlayersView.as_view(), name='eliminar_jugador'),
+    
+#-------------------------------------------------------------------------------------------------------
+  
+    # Rutas para las entidades Phases (fases)
+    path('fases/', PhasesView.as_view(), name='lista_fases'),
+    path('fases/crear/', PhasesView.as_view(), name='crear_fase'),
+    path('fases/<str:phase_id>/', PhasesView.as_view(), name='detalle_fase'),
+    path('fases/actualizar/<str:phase_id>/', PhasesView.as_view(), name='actualizar_fase'),
+    path('fases/eliminar/<str:phase_id>/', PhasesView.as_view(), name='eliminar_fase'),
+    
+#-------------------------------------------------------------------------------------------------------
+
+    # Rutas para las entidades Matches (partidos)
+    path('partidos/', MatchesView.as_view(), name='lista_partidos'),
+    path('partidos/crear/', MatchesView.as_view(), name='crear_partido'),
+    path('partidos/<str:match_id>/', MatchesView.as_view(), name='detalle_partido'),
+    path('partidos/actualizar/<str:match_id>/', MatchesView.as_view(), name='actualizar_partido'),
+    path('partidos/eliminar/<str:match_id>/', MatchesView.as_view(), name='eliminar_partido'),
 ]
